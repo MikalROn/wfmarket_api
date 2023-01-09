@@ -1,4 +1,4 @@
-# Api Warframe marketing
+# Api Warframe market
 
 <p >Classe que busca dados da api do warframe market 
 sobre os item e as orders desses items</p>
