@@ -1,18 +1,16 @@
 import aiohttp
 import asyncio
 import pandas as pd
-from dataclasses import dataclass
+
 
 class _WarframeMKT:
-    '''Classe pai para setar parametros da api'''
+    """Classe pai para setar parametros da api"""
 
     def __init__(self) -> None:
         self._endpoint: str = 'https://api.warframe.market/v1'
 
+
 class WarMKT(_WarframeMKT):
-
-    _counter = 0
-
     @property
     def get_items(self) -> dict:
         url: str = f'{self._endpoint}/items'
@@ -28,14 +26,16 @@ class WarMKT(_WarframeMKT):
 
     @property
     def get_all_ordders(self):
-        ''' [-*AVISO*-]
-        ::> Metodo demora muito a ser executado em media 20 minutos
+        '''
+        [-*AVISO*-]
+        ::> Metodo demora muito a ser executado
         '''
         items_url = self._all_items_url
         return asyncio.run(self._get_all_item_orders(items_url))
 
     async def _get_all_item_orders(self, items_url: list):
-        async with aiohttp.ClientSession() as session:
+        connector = aiohttp.TCPConnector(limit=10)
+        async with aiohttp.ClientSession(connector=connector) as session:
             tasks = []
             results = []
             for item_url in items_url:
@@ -48,15 +48,14 @@ class WarMKT(_WarframeMKT):
 
     async def _get_item_order(self, session, item_url) -> dict:
         url = f'{self._endpoint}/items/{item_url}/orders'
-        response = await asyncio.wait_for(session.get(url), timeout=1000)
+        response = await asyncio.wait_for(session.get(url), timeout=10000)
         if response.status == 200:
-            self._add_counter()
-            print(self._counter)
             return await response.json()
         else:
             return await self._get_item_order(session, item_url)
 
-    async def _request(self, url: str) -> dict:
+    @staticmethod
+    async def _request(url: str) -> dict:
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as r:
                 if r.status == 200:
@@ -68,8 +67,3 @@ class WarMKT(_WarframeMKT):
     def _all_items_url(self) -> list:
         data = pd.DataFrame(self.get_items)
         return data['url_name'].tolist()
-
-
-    def _add_counter(self):
-        self._counter += 1
-
