@@ -26,10 +26,10 @@ class WarMKT(_WarframeMKT):
 
     @property
     def get_all_ordders(self):
-        '''
-        [-*AVISO*-]
-        ::> Metodo demora muito a ser executado
-        '''
+
+        """[-*AVISO*-]
+        ::> Metodo demora muito a ser executado"""
+
         items_url = self._all_items_url
         return asyncio.run(self._get_all_item_orders(items_url))
 
@@ -48,7 +48,7 @@ class WarMKT(_WarframeMKT):
 
     async def _get_item_order(self, session, item_url) -> dict:
         url = f'{self._endpoint}/items/{item_url}/orders'
-        response = await asyncio.wait_for(session.get(url), timeout=10000)
+        response = await asyncio.wait_for(session.get(url), timeout=100)
         if response.status == 200:
             return await response.json()
         else:
